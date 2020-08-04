@@ -36,32 +36,50 @@ public class ReadSymptomDataFromFile implements ISymptomReader {
 		if (!Files.exists(path)) {
 			throw new RuntimeException("This data source file does not exist or is not accessible");
 		} else if (!(filepath.endsWith(".text") | filepath.endsWith(".txt"))) {
-			throw new RuntimeException("Tha data source must be text type file (.txt or .text)");
+			throw new RuntimeException("The data source must be text type file (.txt or .text)");
 		} else {
 			this.filepath = filepath;
 		}
 	}
 
+	// better use "try with resources" (Java 7):
 	@Override
 	public List<String> getSymptoms() {
-		ArrayList<String> result = new ArrayList<String>();
-
-		if (filepath != null) {
-			try {
-				BufferedReader reader = new BufferedReader(new FileReader(filepath));
-				String line = reader.readLine();
-
-				while (line != null) {
-					result.add(line);
-					line = reader.readLine();
-				}
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+		List<String> result = new ArrayList<String>();
+		try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
+			String line = reader.readLine();
+			while (line != null) {
+				result.add(line);
+				line = reader.readLine();
 			}
+		} catch (IOException e) {
+			System.out.println("an exception occurred while reading file");
+			e.printStackTrace();
 		}
-
 		return result;
 	}
 
+	// if JRE<Java 7, use :
+//		@Override
+//		public List<String>getSymptoms() {
+//			List<String> result = new ArrayList<String>();
+//			try {
+//				BufferedReader reader = null;
+//				try {
+//					reader = new BufferedReader(new FileReader(filepath));
+//					String line = reader.readLine();
+//					while (line != null) {
+//						result.add(line);
+//						line = reader.readLine();
+//					}
+//				} finally {
+//					if (reader!=null)
+//					reader.close();
+//				}
+//			} catch (IOException e) {
+//				System.out.println("an exception occurred while reading file");
+//				e.printStackTrace();
+//			}
+//			return result;
+//		}
 }
